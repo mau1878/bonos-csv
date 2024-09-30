@@ -1,12 +1,10 @@
-import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-import pandas as pd
-import time
+from selenium.webdriver.chrome.options import Options
 
 # Streamlit UI
-st.title("Bond Historical Data Scraper (Selenium Version)")
+st.title("Bond Historical Data Scraper (Selenium)")
 st.write("This app scrapes and saves historical data from Rava for the bond you specify.")
 
 # Input for the user to enter the bond ticker
@@ -14,9 +12,15 @@ bond_ticker = st.text_input("Enter bond ticker (e.g., AL30, AE38, GD35):", "AL30
 
 # Button to trigger the data scraping
 if st.button('Scrape Data'):
+    # Set up Chrome options for headless mode
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")  # Optional: Needed for certain environments
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # Selenium WebDriver setup (Automatically downloads the ChromeDriver if not installed)
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    # Selenium WebDriver setup (Headless mode)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     # URL for the bond profile page on Rava
     url = f'https://www.rava.com/perfil/{bond_ticker.lower()}'
@@ -25,8 +29,8 @@ if st.button('Scrape Data'):
     # Give time for the page to load
     time.sleep(3)
 
-    # Find the table using XPath
     try:
+        # Find the table using XPath
         table = driver.find_element_by_xpath('/html/body/div[1]/main/div/div/div[3]/div[2]/div/div/div[2]')
         
         # Extract rows from the table
